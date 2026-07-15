@@ -47,6 +47,10 @@
                  <groupId>org.owasp</groupId>
                  <artifactId>dependency-check-maven</artifactId>
                  <version>12.1.0</version>
+
+                  <configuration>
+                          <nvdApiKey>2e60016c-cd9b-499e-bba9-213fa6fa74cb</nvdApiKey>
+                  </configuration>
                  <executions>
                  <execution>
                   <goals>
