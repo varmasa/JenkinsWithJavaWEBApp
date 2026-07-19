@@ -1,13 +1,9 @@
 pipeline {
-    agent any
-    environment {
-        VERSION = "1.0.${BUILD_NUMBER}"
-    }
-        stage('Maven Build') {
+    stages {
+        stage('Deploy') {
             steps {
-                dir('webapp-java') {
-                  sh 'mvn clean package'
-                }
+                echo "Deploy to Production"
             }
         }
+    }
 }
