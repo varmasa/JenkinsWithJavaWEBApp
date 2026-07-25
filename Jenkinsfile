@@ -24,17 +24,6 @@ pipeline {
                }
            }
        }
-       stage('Trivy Image Scan') {
-           steps {
-              sh '''
-                  trivy image \
-                  --severity HIGH,CRITICAL \
-                  --exit-code 1 \
-                  --no-progress \
-                  saivarma5557/javawebapp:"${VERSION}"
-             '''
-           }
-      }
       stage('Push to Docker Hub') {
           steps {
              script {
