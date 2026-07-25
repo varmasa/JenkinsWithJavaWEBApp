@@ -20,21 +20,11 @@ pipeline {
             steps {
                 dir('webapp-java') {
                     sh '''
-                    # Stop and remove old container if it exists
-                    docker rm -f hello-webapp || true
-
                     # Remove old image if it exists
-                   docker rmi -f $(docker images -q)
+                    docker rmi -f $(docker images -q)
 
                     # Build new image
                     docker build -t saivarma5557/javawebapp:${VERSION} .
-
-                    # Run new container
-                    docker run -d \
-                      --name hello-webapp \
-                      -p 8085:8085 \
-                      saivarma5557/javawebapp:${VERSION}
-                    '''
                 }
             }
         }
@@ -47,5 +37,25 @@ pipeline {
              }
           }
       }
+      stage('Deploy to Kubernetes') {
+        steps {
+            withKubeCredentials([
+                kubernetesCredentials(
+                    serverUrl: 'https://192.168.49.2:8443',
+                    credentialsId: 'KubernetesToken',
+                    caCertificateCredentialsId: 'k8scrt'
+            )
+        ]) {
+            sh """
+                kubectl set image deployment/javawebapp \
+                javawebapp=saivarma5557/javawebapp:${VERSION}
+
+                kubectl rollout status deployment/javawebapp
+
+                kubectl get pods
+            """
+            }
+        }
+    }
    }
 }
