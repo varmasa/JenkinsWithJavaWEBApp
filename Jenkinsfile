@@ -1,9 +1,31 @@
+@Library('devops-library') _
+
 pipeline {
+
+    agent any
+    
     stages {
-        stage('Deploy') {
+
+        stage('Checkout') {
             steps {
-                echo "Deploy to Production"
+                checkout scm
             }
+        }
+
+        stage('Build') {
+            steps {
+                buildMaven("webapp-java/pom.xml")
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Build Successful"
+        }
+
+        failure {
+            echo "Build Failed"
         }
     }
 }
