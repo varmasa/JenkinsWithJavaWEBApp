@@ -14,7 +14,7 @@ pipeline {
 
         stage('Build') {
             steps {
-                buildMaven("webapp-java/pom.xml")
+                buildJava("webapp-java/pom.xml")
             }
         }
     }
