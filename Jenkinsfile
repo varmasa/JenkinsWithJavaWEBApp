@@ -46,25 +46,34 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-
-                withKubeCredentials([
-                    kubernetesCredentials(
-                        serverUrl: 'https://192.168.49.2:8443',
-                        credentialsId: 'KubernetesToken',
-                        caCertificateCredentialsId: 'k8scrt'
-                    )
+                withCredentials([
+                    string(credentialsId: 'KubernetesToken', variable: 'K8S_TOKEN'),
+                    file(credentialsId: 'k8scrt', variable: 'K8S_CA')
                 ]) {
+            sh '''
+            kubectl config set-cluster minikube \
+                --server=https://192.168.49.2:8443 \
+                --certificate-authority=$K8S_CA \
+                --embed-certs=true
 
-                    sh """
-                        kubectl set image deployment/javawebapp \
-                        javawebapp=saivarma5557/javawebapp:${VERSION}
+            kubectl config set-credentials jenkins \
+                --token=$K8S_TOKEN
 
-                        kubectl rollout status deployment/javawebapp
+            kubectl config set-context jenkins \
+                --cluster=minikube \
+                --user=jenkins
 
-                        kubectl get pods
-                    """
-                }
-            }
+            kubectl config use-context jenkins
+
+            kubectl set image deployment/javawebapp \
+                javawebapp=saivarma5557/javawebapp:${VERSION}
+
+            kubectl rollout status deployment/javawebapp
+
+            kubectl get pods
+            '''
         }
+    }
+}
     }
 }
