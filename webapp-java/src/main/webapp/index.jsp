@@ -5,7 +5,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Login | DevOps Demo</title>
+<title>Login DevOps Demo</title>
 
 <style>
 *{
