@@ -24,7 +24,7 @@ pipeline {
                     docker rm -f hello-webapp || true
 
                     # Remove old image if it exists
-                    docker rmi -f saivarma5557/javawebapp:${VERSION} || true
+                   docker rmi -f $(docker images -q)
 
                     # Build new image
                     docker build -t saivarma5557/javawebapp:${VERSION} .
