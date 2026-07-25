@@ -1,31 +1,48 @@
-@Library('devops-library') _
-
 pipeline {
-
     agent any
-    
+    environment {
+        VERSION = "1.0.${BUILD_NUMBER}"
+    }
     stages {
-
-        stage('Checkout') {
+        stage('Git checkout') {
             steps {
-                checkout scm
+                git branch: 'main', url: 'https://github.com/varmasa/JenkinsWithJavaWEBApp.git'
             }
         }
-
-        stage('Build') {
+        stage('Maven Build') {
             steps {
-                buildJava("webapp-java/pom.xml")
+                dir('webapp-java') {
+                  sh 'mvn clean package'
+                }
             }
         }
-    }
-
-    post {
-        success {
-            echo "Build Successful"
-        }
-
-        failure {
-            echo "Build Failed"
-        }
-    }
+       stage('Dockerbuild') {
+           steps {
+               dir('webapp-java'){
+               sh 'docker build -t saivarma5557/javawebapp:"${VERSION}" .'
+               sh 'docker run -itd --name hello-webapp -p 8085:8085 saivarma5557/javawebapp:"${VERSION}"'
+               }
+           }
+       }
+       stage('Trivy Image Scan') {
+           steps {
+              sh '''
+                  trivy image \
+                  --severity HIGH,CRITICAL \
+                  --exit-code 1 \
+                  --no-progress \
+                  saivarma5557/javawebapp:"${VERSION}"
+             '''
+           }
+      }
+      stage('Push to Docker Hub') {
+          steps {
+             script {
+                 docker.withRegistry('https://index.docker.io/v1/', 'dockercredID') {
+                         sh 'docker push saivarma5557/javawebapp:"${VERSION}"'
+                 }
+             }
+          }
+      }
+   }
 }
