@@ -18,8 +18,14 @@ RUN sed -i '/<\/Host>/i\
 # Remove default applications
 RUN rm -rf /usr/local/tomcat/webapps/*
 
+# Download OpenTelemetry Java Agent
+ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar /opt/opentelemetry-javaagent.jar
+
 # Copy application
 COPY target/hello-webapp.war /usr/local/tomcat/webapps/ROOT.war
+
+# Configure Tomcat to load the OpenTelemetry Java Agent
+ENV CATALINA_OPTS="-javaagent:/opt/opentelemetry-javaagent.jar"
 
 EXPOSE 8085
 
